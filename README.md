@@ -1,6 +1,6 @@
 # pimpmykali.sh
 
-![pmk2 0 0](https://github.com/user-attachments/assets/08cdd9c8-83c7-41e0-a65c-8bf7690a7f36)
+![screenshot of menu](pimpmykali_screenshot.png)
 
 
 # Fixes for new imported Kali Linux virtual machines
@@ -24,6 +24,7 @@ git clone https://github.com/Dewalt-arch/pimpmykali
 cd pimpmykali
 
 # Execute the script - For a new Kali VM, run menu option 'N'
+# To set up kali VM for OSCP, run menu option 'S'
 # (The script must be run with root privileges)
 sudo ./pimpmykali.sh
 

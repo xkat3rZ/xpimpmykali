@@ -1511,7 +1511,446 @@ hacking_api_prereq() {
     echo -e "\n  ${greenplus} Please cd $PWD"
     echo -e "       and run the following command : sudo docker-compose up "
     }  
+install_joomscan() {
 
+    JOOMSCAN_URL="https://github.com/OWASP/joomscan"
+    JOOMSCAN_DIR="/opt/joomscan"
+
+    echo -e "${spaces}${greenplus} Installing joomscan"
+
+    [ -d $JOOMSCAN_DIR ] && rm -rf $JOOMSCAN_DIR
+
+    git clone $JOOMSCAN_URL $JOOMSCAN_DIR
+    cd $JOOMSCAN_DIR
+
+}
+
+install_cmsmap() {
+
+    CMSMAP_URL="https://github.com/dionach/CMSmap"
+    CMSMAP_DIR="/opt/cmsmap"
+
+    echo -e "${spaces}${greenplus} Installing cmsmap"
+
+    [ -d $CMSMAP_DIR ] && rm -rf $CMSMAP_DIR
+
+    git clone $CMSMAP_URL $CMSMAP_DIR
+    cd $CMSMAP_DIR
+    /usr/bin/pip3 install .
+    is_installed "exploitdb"
+}
+
+install_cewl() {
+
+    CEWL_URL="https://github.com/digininja/CeWL"
+    CEWL_DIR="/opt/cewl"
+
+    echo -e "${spaces}${greenplus} Installing cewl"
+
+    [ -d $CEWL_DIR ] && rm -rf $CEWL_DIR
+
+    git clone $CEWL_URL $CEWL_DIR
+    cd $CEWL_DIR
+    sudo gem install bundler
+    sudo bundle install
+}
+
+install_ligolo() {
+
+    LIGOLO_URL="https://github.com/nicocha30/ligolo-ng/releases/download/v0.6.2"
+    LIGOLO_PROXY="/opt/ligolo-ng_proxy"
+    LIGOLO_PROXY_DIR="/opt/ligolo-ng_proxy_dir"
+
+    [ -f $LIGOLO_PROXY ] && rm -f $LIGOLO_PROXY
+    [ -d $LIGOLO_PROXY_DIR ] && rm -rf $LIGOLO_PROXY_DIR
+
+    echo -e "${spaces}${greenplus} Downloading Ligolo-ng proxy: $LIGOLO_URL/ligolo-ng_proxy_0.6.2_linux_$arch.tar.gz to $LIGOLO_PROXY.tar.gz\n"
+    sudo curl -L "$LIGOLO_URL/ligolo-ng_proxy_0.6.2_linux_$arch.tar.gz" -o $LIGOLO_PROXY.tar.gz
+
+    sudo mkdir $LIGOLO_PROXY_DIR
+    tar -xzvf $LIGOLO_PROXY.tar.gz -C $LIGOLO_PROXY_DIR
+    mv $LIGOLO_PROXY_DIR/proxy $LIGOLO_PROXY
+
+    echo -e "${spaces}${greenplus} Creating Symlink /usr/local/bin/ligolo-ng_proxy"
+    [ -L /usr/local/bin/ligolo-ng_proxy ] && rm -f /usr/local/bin/ligolo-ng_proxy
+    ln -sf $LIGOLO_PROXY /usr/local/bin/ligolo-ng_proxy
+
+    [ -d $LIGOLO_PROXY_DIR ] && rm -rf $LIGOLO_PROXY_DIR
+    [ -f $LIGOLO_PROXY.tar.gz ] && rm -f $LIGOLO_PROXY.tar.gz
+
+    LIGOLO_AGENT_DIR="/opt/ligolo-ng_agent_dir"
+    LIGOLO_AGENT="/opt/ligolo-ng_agent"
+
+    [ -f $LIGOLO_AGENT ] && rm -f $LIGOLO_AGENT
+    [ -d $LIGOLO_AGENT_DIR ] && rm -rf $LIGOLO_AGENT_DIR
+
+    echo -e "${spaces}${greenplus} Downloading Ligolo-ng agent $LIGOLO_URL/ligolo-ng_agent_0.6.2_linux_$arch.tar.gz to $LIGOLO_AGENT.tar.gz\n"
+    curl -L "$LIGOLO_URL/ligolo-ng_agent_0.6.2_linux_$arch.tar.gz" -o $LIGOLO_AGENT.tar.gz
+
+    [ -d $LIGOLO_AGENT_DIR ] && rm -rf $LIGOLO_AGENT_DIR
+    sudo mkdir $LIGOLO_AGENT_DIR
+    tar -xzvf $LIGOLO_AGENT.tar.gz -C $LIGOLO_AGENT_DIR
+    mv $LIGOLO_AGENT_DIR/agent $LIGOLO_AGENT
+
+    [ -d $LIGOLO_AGENT_DIR ] && rm -rf $LIGOLO_AGENT_DIR
+    [ -f $LIGOLO_AGENT.tar.gz ] && rm -f $LIGOLO_AGENT.tar.gz
+
+    sudo chown $(whoami):$(whoami) $LIGOLO_PROXY
+    sudo chown $(whoami):$(whoami) $LIGOLO_AGENT
+}
+
+install_chisel() {
+
+    CHISEL="/opt/chisel"
+    CHISEL_URL="https://github.com/jpillora/chisel/releases/download/v1.7.7"
+    CHISEL_LINUX_DOWNLOAD_TAR="/opt/chisel_linux.gz"
+    CHISEL_LINUX_DIR="/opt/chisel_linux_dir"
+
+    [ -f $CHISEL ] && rm -f $CHISEL
+
+    echo -e "${spaces}${greenplus} Downloading Chisel for Linux: $CHISEL_URL/chisel_1.7.7_linux_$arch.gz to $CHISEL_LINUX_DOWNLOAD_TAR\n"
+    sudo curl -L "$CHISEL_URL/chisel_1.7.7_linux_$arch.gz" -o $CHISEL_LINUX_DOWNLOAD_TAR
+
+    [ -d $CHISEL_LINUX_DIR ] && rm -rf $CHISEL_LINUX_DIR
+    sudo mkdir $CHISEL_LINUX_DIR
+    gunzip $CHISEL_LINUX_DOWNLOAD_TAR
+    mv /opt/chisel_linux $CHISEL
+    chmod 755 $CHISEL
+
+    echo -e "${spaces}${greenplus} Creating Symlink /usr/local/bin/chisel"
+    [ -L /usr/local/bin/chisel ] && rm -f /usr/local/bin/chisel
+    ln -sf $CHISEL /usr/local/bin/chisel
+
+    [ -d $CHISEL_LINUX_DIR ] && rm -rf $CHISEL_LINUX_DIR
+    [ -f $CHISEL_LINUX_DOWNLOAD_TAR ] && rm -f $CHISEL_LINUX_DOWNLOAD_TAR
+
+    echo -e "${spaces}${greenplus} Downloading Chisel for Windows: $CHISEL_URL/chisel_1.7.7_windows_$arch.gz to $CHISEL_WIN_DIR\n"
+    CHISEL_WIN="/opt/chisel_win"
+    CHISEL_WIN_DIR="/opt/chisel_win_dir"
+    CHISEL_WIN_DOWNLOAD_TAR="$CHISEL_WIN.gz"
+
+    sudo curl -L "$CHISEL_URL/chisel_1.7.7_windows_$arch.gz" -o $CHISEL_WIN_DOWNLOAD_TAR
+
+    [ -d $CHISEL_WIN_DIR ] && rm -rf $CHISEL_WIN_DIR
+    [ -f $CHISEL_WIN ] && rm -f $CHISEL_WIN
+
+    sudo mkdir $CHISEL_WIN_DIR
+    gunzip $CHISEL_WIN_DOWNLOAD_TAR
+    chmod 755 $CHISEL_WIN
+
+    [ -d $CHISEL_WIN_DIR ] && rm -rf $CHISEL_WIN_DIR
+    [ -f $CHISEL_WIN_DOWNLOAD_TAR ] && rm -f $CHISEL_WIN_DOWNLOAD_TAR
+}
+
+install_kerbrute() {
+
+    KERBRUTE_LINUX="/opt/kerbrute"
+    KERBRUTE_WINDOWS="/opt/kerbrute_windows.exe"
+
+    [ -f $KERBRUTE_LINUX ] && {
+        rm -f $KERBRUTE_LINUX
+        rm -f $KERBRUTE_WINDOWS
+        KERBRUTE_REPO_URL="https://github.com/ropnop/kerbrute/tags"
+
+        LATEST_VERSION=$(curl -s "$KERBRUTE_REPO_URL" | grep -oPm1 '/ropnop/kerbrute/releases/tag/v\K[\d.]+')
+        echo -e "\n  ${greenplus} Downloading kerbrute $LATEST_VERSION from github"
+
+        KERBRUTE_URL="https://github.com/ropnop/kerbrute/releases/download/v$LATEST_VERSION/kerbrute_linux_amd64"
+        echo -e "${spaces}${greenplus} Downloading rlwrap for Linux: $KERBRUTE_URL to $KERBRUTE_LINUX\n"
+        sudo curl -L "$KERBRUTE_URL" -o $KERBRUTE_LINUX
+
+        chmod 755 $KERBRUTE_LINUX
+
+        echo -e "${spaces}${greenplus} Creating Symlink /usr/local/bin/kerbrute"
+        [ -L /usr/local/bin/kerbrute ] && rm -f /usr/local/bin/kerbrute
+        ln -sf $KERBRUTE_LINUX /usr/local/bin/kerbrute
+
+        KERBRUTE_URL="https://github.com/ropnop/kerbrute/releases/download/v$LATEST_VERSION/kerbrute_windows_amd64.exe"
+        echo -e "${spaces}${greenplus} Downloading rlwrap for Windows: $KERBRUTE_URL to $KERBRUTE_WINDOWS\n"
+        sudo curl -L "$KERBRUTE_URL" -o $KERBRUTE_WINDOWS
+    }
+}
+
+install_rubeus() {
+
+    RUBEUS="/opt/Rubeus.exe"
+    GHOSTPACK_BINARIES_DIR="/opt/Ghostpack-CompiledBinaries"
+
+    [ -f $RUBEUS ] && rm -f $RUBEUS
+    [ -d $GHOSTPACK_BINARIES_DIR ] && rm -rf $GHOSTPACK_BINARIES_DIR
+
+    GHOSTPACK_BINARIES_REPO_URL="https://github.com/r3motecontrol/Ghostpack-CompiledBinaries"
+
+    echo -e "${spaces}${greenplus} Downloading Ghostpack binaries for Windows: $GHOSTPACK_BINARIES_REPO_URL to $GHOSTPACK_BINARIES_DIR\n"
+    cd /opt
+    sudo git clone $GHOSTPACK_BINARIES_REPO_URL
+
+    sudo cp $GHOSTPACK_BINARIES_DIR/Rubeus.exe $RUBEUS
+}
+
+install_mimikatz() {
+
+    MIMIKATZ_GENTILKIWI_X64="/opt/mimikatz_x64.exe"
+    MIMIKATZ_GENTILKIWI_X32="/opt/mimikatz_x32.exe"
+
+    MIMIKATZ_GENTILKIWI_ZIP="/opt/mimikatz.zip"
+    MIMIKATZ_GENTILKIWI_DIR="/opt/mimikatz_dir"
+
+    [ -f $MIMIKATZ_GENTILKIWI_X64 ] && rm -f $MIMIKATZ_GENTILKIWI_X64
+    [ -f $MIMIKATZ_GENTILKIWI_X32 ] && rm -f $MIMIKATZ_GENTILKIWI_X32
+
+    MIMIKATZ_GENTILKIWI_REPO_URL="https://github.com/gentilkiwi/mimikatz/tags"
+
+    LATEST_VERSION=$(curl -s "$MIMIKATZ_GENTILKIWI_REPO_URL" | grep -oPm1 '/gentilkiwi/mimikatz/releases/tag/\K[\d.-]+')
+    echo -e "\n  ${greenplus} Downloading mimikatz $LATEST_VERSION from github gentilkiwi"
+
+    MIMIKATZ_GENTILKIWI_URL="https://github.com/gentilkiwi/mimikatz/releases/download/$LATEST_VERSION/mimikatz_trunk.zip"
+    echo -e "${spaces}${greenplus} Downloading mimikatz x64 and x32 for Windows: $MIMIKATZ_GENTILKIWI_URL to $MIMIKATZ_GENTILKIWI_ZIP\n"
+    sudo curl -L "$MIMIKATZ_GENTILKIWI_URL" -o $MIMIKATZ_GENTILKIWI_ZIP
+
+    unzip $MIMIKATZ_GENTILKIWI_ZIP -d $MIMIKATZ_GENTILKIWI_DIR
+    mv $MIMIKATZ_GENTILKIWI_DIR/x64/mimikatz.exe $MIMIKATZ_GENTILKIWI_X64
+    mv $MIMIKATZ_GENTILKIWI_DIR/Win32/mimikatz.exe $MIMIKATZ_GENTILKIWI_X32
+
+    [ -d $MIMIKATZ_GENTILKIWI_DIR ] && rm -rf $MIMIKATZ_GENTILKIWI_DIR
+    [ -f $MIMIKATZ_GENTILKIWI_ZIP ] && rm -f $MIMIKATZ_GENTILKIWI_ZIP
+
+    echo -e "\n  ${greenplus} Downloading mimikatz from github ParrotSec"
+    MIMIKATZ_PARROTSEC="/opt/mimikatz_parrotsec"
+    MIMIKATZ_PARROTSEC_URL="https://github.com/ParrotSec/mimikatz"
+
+    [ -d $MIMIKATZ_PARROTSEC ] && rm -rf $MIMIKATZ_PARROTSEC
+    git clone $MIMIKATZ_PARROTSEC_URL $MIMIKATZ_PARROTSEC
+}
+
+install_sharphound() {
+
+    SHARPHOUND_DIR="/opt/sharphound_v1.1.1_dir"
+    SHARPHOUND_ZIP="/opt/sharphound_v1.1.1.zip"
+
+    [ -d $SHARPHOUND_DIR ] && rm -rf $SHARPHOUND_DIR
+    [ -f $SHARPHOUND_ZIP ] && rm -f $SHARPHOUND_ZIP
+
+    SHARPHOUND_URL="https://github.com/SpecterOps/SharpHound/releases/download/v1.1.1"
+
+    echo -e "${spaces}${greenplus} Downloading Sharphound version 1.1.1: $SHARPHOUND_URL/SharpHound-v1.1.1.zip to $SHARPHOUND_DIR\n"
+    sudo curl -L "$SHARPHOUND_URL/SharpHound-v1.1.1.zip" -o $SHARPHOUND_ZIP
+
+    sudo mkdir $SHARPHOUND_DIR
+    unzip $SHARPHOUND_ZIP -d $SHARPHOUND_DIR
+    mv $SHARPHOUND_DIR/SharpHound.exe /opt/SharpHound_v1.1.1.exe
+    mv $SHARPHOUND_DIR/SharpHound.ps1 /opt/SharpHound_v1.1.1.ps1
+
+    [ -d $SHARPHOUND_DIR ] && rm -rf $SHARPHOUND_DIR
+    [ -f $SHARPHOUND_ZIP ] && rm -f $SHARPHOUND_ZIP
+}
+
+install_ad_tools() {
+
+    install_kerbrute
+
+    install_rubeus
+
+    install_mimikatz
+
+    install_sharphound
+
+    echo -e "\n  ${greenplus} Downloading bloodhound-v4.3.1 and Python based ingestor for BloodHound (bloodhound-python)"
+    is_installed "bloodhound bloodhound.py"
+}
+
+install_godpotato() {
+
+    GODPOTATO_NET2="/opt/potatoes/GodPotato-NET2.exe"
+    GODPOTATO_NET35="/opt/potatoes/GodPotato-NET35.exe"
+    GODPOTATO_NET4="/opt/potatoes/GodPotato-NET4.exe"
+
+    [ -f $GODPOTATO_NET2 ] && rm -f $GODPOTATO_NET2
+    [ -f $GODPOTATO_NET35 ] && rm -f $GODPOTATO_NET35
+    [ -f $GODPOTATO_NET4 ] && rm -f $GODPOTATO_NET4
+
+    GODPOTATO_REPO_URL="https://github.com/BeichenDream/GodPotato/tags"
+
+    LATEST_VERSION=$(curl -s "$GODPOTATO_REPO_URL" | grep -oPm1 '/BeichenDream/GodPotato/releases/tag/V\K[\d.-]+')
+    echo -e "\n  ${greenplus} Downloading GodPotato $LATEST_VERSION from github BeichenDream"
+
+    GODPOTATO_NET2_URL="https://github.com/BeichenDream/GodPotato/releases/download/V$LATEST_VERSION/GodPotato-NET2.exe"
+    echo -e "${spaces}${greenplus} Downloading GodPotato NET2 for Windows: $GODPOTATO_NET2_URL to $GODPOTATO_NET2\n"
+    sudo curl -L "$GODPOTATO_NET2_URL" -o $GODPOTATO_NET2
+
+    GODPOTATO_NET35_URL="https://github.com/BeichenDream/GodPotato/releases/download/V$LATEST_VERSION/GodPotato-NET35.exe"
+    echo -e "${spaces}${greenplus} Downloading GodPotato NET35 for Windows: $GODPOTATO_NET35_URL to $GODPOTATO_NET35\n"
+    sudo curl -L "$GODPOTATO_NET35_URL" -o $GODPOTATO_NET35
+
+    GODPOTATO_NET4_URL="https://github.com/BeichenDream/GodPotato/releases/download/V$LATEST_VERSION/GodPotato-NET4.exe"
+    echo -e "${spaces}${greenplus} Downloading GodPotato NET4 for Windows: $GODPOTATO_NET4_URL to $GODPOTATO_NET4\n"
+    sudo curl -L "$GODPOTATO_NET4_URL" -o $GODPOTATO_NET4
+}
+
+install_juicypotato_ng() {
+
+    JUICYPOTATO="/opt/potatoes/JuicyPotatoNG.exe"
+    JUICYPOTATO_ZIP="/opt/JuicyPotatoNG.zip"
+    JUICYPOTATO_DIR="/opt/JuicyPotatoNG_dir"
+
+    [ -f $JUICYPOTATO ] && rm -f $JUICYPOTATO
+    [ -f $JUICYPOTATO_ZIP ] && rm -f $JUICYPOTATO_ZIP
+    [ -d $JUICYPOTATO_DIR ] && rm -rf $JUICYPOTATO_DIR
+
+    JUICYPOTATO_REPO_URL="https://github.com/antonioCoco/JuicyPotatoNG/tags"
+
+    LATEST_VERSION=$(curl -s "$JUICYPOTATO_REPO_URL" | grep -oPm1 '/antonioCoco/JuicyPotatoNG/releases/tag/v\K[\d.-]+')
+    echo -e "\n  ${greenplus} Downloading JuicyPotatoNG $LATEST_VERSION from github antonioCoco"
+
+    JUICYPOTATO_URL="https://github.com/antonioCoco/JuicyPotatoNG/releases/download/v$LATEST_VERSION/JuicyPotatoNG.zip"
+    sudo curl -L "$JUICYPOTATO_URL" -o $JUICYPOTATO_ZIP
+
+    unzip $JUICYPOTATO_ZIP -d $JUICYPOTATO_DIR
+    mv $JUICYPOTATO_DIR/JuicyPotatoNG.exe $JUICYPOTATO
+
+    [ -f $JUICYPOTATO_ZIP ] && rm -f $JUICYPOTATO_ZIP
+    [ -d $JUICYPOTATO_DIR ] && rm -rf $JUICYPOTATO_DIR
+
+}
+
+install_printspoofer() {
+
+    PRINTSPOOFER_x32="/opt/potatoes/PrintSpoofer32.exe"
+    PRINTSPOOFER_x64="/opt/potatoes/PrintSpoofer64.exe"
+
+    [ -f $PRINTSPOOFER_x32 ] && rm -f $PRINTSPOOFER_x32
+    [ -f $PRINTSPOOFER_x64 ] && rm -f $PRINTSPOOFER_x64
+
+    GODPOTATO_REPO_URL="https://github.com/itm4n/PrintSpoofer/tags"
+
+    LATEST_VERSION=$(curl -s "$GODPOTATO_REPO_URL" | grep -oPm1 '/itm4n/PrintSpoofer/releases/tag/v\K[\d.-]+')
+    echo -e "\n  ${greenplus} Downloading PrintSpoofer $LATEST_VERSION from github itm4n"
+
+    PRINTSPOOFER_x32_URL="https://github.com/itm4n/PrintSpoofer/releases/download/v$LATEST_VERSION/PrintSpoofer32.exe"
+    echo -e "${spaces}${greenplus} Downloading PrintSpoofer x32 for Windows: $PRINTSPOOFER_x32_URL to $PRINTSPOOFER_x32\n"
+    sudo curl -L "$PRINTSPOOFER_x32_URL" -o $PRINTSPOOFER_x32
+
+    PRINTSPOOFER_x64_URL="https://github.com/itm4n/PrintSpoofer/releases/download/v$LATEST_VERSION/PrintSpoofer64.exe"
+    echo -e "${spaces}${greenplus} Downloading PrintSpoofer x64 for Windows: $PRINTSPOOFER_x64_URL to $PRINTSPOOFER_x64\n"
+    sudo curl -L "$PRINTSPOOFER_x64_URL" -o $PRINTSPOOFER_x64
+}
+
+install_potatoes() {
+
+    POTATOES_DIR="/opt/potatoes"
+
+    [ -d $POTATOES_DIR ] && rm -rf $POTATOES_DIR
+    sudo mkdir $POTATOES_DIR
+
+    install_godpotato
+
+    install_juicypotato_ng
+
+    install_printspoofer
+}
+
+install_productivity_tools() {
+    echo -e "\n  ${greenplus} Installing rlwrap"
+    is_installed "autoconf automake libtool libreadline-dev ripgrep"
+
+    RLWRAP_DIR="/opt/rlwrap"
+
+    [ ! -d $RLWRAP_DIR ] && {
+        rm -rf $RLWRAP_DIR
+        RLWRAP_REPO_URL="https://github.com/hanslub42/rlwrap/tags"
+
+        LATEST_VERSION=$(curl -s "$RLWRAP_REPO_URL" | grep -oPm1 '/hanslub42/rlwrap/releases/tag/\K[\d.]+')
+        echo -e "\n  ${greenplus} Downloading rlwrap $LATEST_VERSION from github"
+
+        RLWRAP_URL="https://github.com/hanslub42/rlwrap/releases/download/$LATEST_VERSION/rlwrap-$LATEST_VERSION.tar.gz"
+        RLWRAP_DOWNLOAD_TAR="$RLWRAP_DIR.tar.gz"
+
+        echo -e "${spaces}${greenplus} Downloading rlwrap for Linux: $RLWRAP_URL to $RLWRAP_DOWNLOAD_TAR\n"
+        sudo curl -L "$RLWRAP_URL" -o $RLWRAP_DOWNLOAD_TAR
+
+        [ -d $RLWRAP_DIR ] && rm -rf $RLWRAP_DIR
+        sudo mkdir $RLWRAP_DIR
+        tar -xzvf $RLWRAP_DOWNLOAD_TAR -C $RLWRAP_DIR
+
+        cd $RLWRAP_DIR/rlwrap-$LATEST_VERSION
+        ./configure
+        make
+        sudo make install
+
+        [ -f $RLWRAP_DOWNLOAD_TAR ] && rm -f $RLWRAP_DOWNLOAD_TAR
+    }
+
+    echo -e "\n  ${greenplus} Installing fzf"
+
+    FZF="/opt/fzf"
+    FZF_DIR="/opt/fzf_dir"
+
+    [ ! -d $FZF_DIR ] && {
+        [ -d $FZF_DIR ] && rm -rf $FZF_DIR
+        FZF_REPO_URL="https://github.com/junegunn/fzf/tags"
+
+        LATEST_VERSION=$(curl -s "$FZF_REPO_URL" | grep -oPm1 '/junegunn/fzf/releases/tag/v\K[\d.]+')
+        echo -e "\n  ${greenplus} Downloading fzf $LATEST_VERSION from github"
+        FZF_URL="https://github.com/junegunn/fzf/releases/download/v$LATEST_VERSION/fzf-$LATEST_VERSION-linux_$arch.tar.gz"
+        FZF_DOWNLOAD_TAR="$FZF_DIR.tar.gz"
+        sudo curl -L "$FZF_URL" -o $FZF_DOWNLOAD_TAR
+        sudo mkdir $FZF_DIR
+
+        tar -xzvf $FZF_DOWNLOAD_TAR -C $FZF_DIR
+        cd $FZF_DIR
+        mv $FZF_DIR/fzf $FZF
+
+        echo -e "${spaces}${greenplus} Creating Symlink /usr/local/bin/fzf"
+        [ -L /usr/local/bin/fzf ] && rm -f /usr/local/bin/fzf
+        ln -sf $FZF /usr/local/bin/fzf
+        zsh -c "source <(fzf --zsh)"
+
+        [ -d $FZF_DIR ] && rm -rf $FZF_DIR
+        [ -d $FZF_DOWNLOAD_TAR ] && rm -rf $FZF_DOWNLOAD_TAR
+    }
+}
+
+xkat3rZ_oscp() {
+
+    echo -e "\n  ${greenplus} Creating a python virtual environment"
+    is_installed "pypy3-venv"
+    python3 -m venv /home/$finduser/Desktop/oscp
+    source /home/$finduser/Desktop/oscp/bin/activate
+
+    echo -e "\n  ${greenplus} Installing autorecon"
+    is_installed "seclists curl dnsrecon enum4linux feroxbuster gobuster impacket-scripts nbtscan nikto nmap onesixtyone oscanner redis-tools smbclient smbmap snmp sslscan sipvicious tnscmd10g whatweb"
+    python3 -m pip install git+https://github.com/Tib3rius/AutoRecon.git
+
+    echo -e "\n  ${greenplus} Installing directory busting tool"
+    is_installed "dirsearch subfinder"
+
+    echo -e "\n  ${greenplus} Installing Content Management System (CMS) scans"
+    pip3 install droopescan
+    install_joomscan
+    install_cmsmap
+
+    echo -e "\n  ${greenplus} Installing web hacking tools"
+    install_cewl
+    pip3 install git-dumper
+
+    echo -e "\n  ${greenplus} Installing cracking tools"
+    is_installed "fcrackzip keepassxc"
+
+    echo -e "\n  ${greenplus} Installing tunneling tools"
+    install_ligolo
+    install_chisel
+    is_installed "dnscat2-client dnscat2-server"
+
+    echo -e "\n  ${greenplus} Installing active directory hacking tools"
+    install_ad_tools
+
+    echo -e "\n  ${greenplus} Installing potatoes"
+    install_potatoes
+
+    echo -e "\n  ${greenplus} Installing productivity tools"
+    install_productivity_tools
+
+}
 
 check_nessusd_active() {
     check_nessusd_service=$(sudo systemctl status nessusd | grep -i -c  "active (running)")
@@ -2624,6 +3063,7 @@ pimpmykali_menu() {
       echo -e " ---  --COURSES-------------------- ------------"                                                 # 
       echo -e "  A - MAPT Course Setup             (adds requirments for MAPT Course)"                           # mapt_course
       echo -e "  B - Practical Bugbounty Labs      (add requirements for PBB course labs)"                       # pbb_lab_setup
+      echo -e "  S - xkat3rZ OSCP Setup            (add requirements for OffSec OSCP course)"                    # xkat3rZ_oscp
       echo -e "  E - PEH Course WebApp Labs        (add requirements for PEH WebApp Labs and installs) "         # apt_update fix_libwacom peh_weblab_setup
       echo -e "  O - Hacking API Course Setup      (add requirements for Hacking API Course)"                    # hacking_api_prereq
       echo -e "  Y - Andrew B IoT Hardware Hacking (add requirements for IoT Course)"                            # iot_course_setup
@@ -2683,7 +3123,7 @@ pimpmykali_menu() {
       p|P) fix_linwinpeas;; 
 #      q|Q) ;;
 #      r|R) ;;
-#      s|S) ;;
+      s|S) xkat3rZ_oscp;;
       t|T) fix_timezone;;
       u|U) fix_netexec;;
       v|V) install_vscode;;
@@ -2819,6 +3259,7 @@ check_arg() {
             --pbb) pbb_lab_setup;;
       --pehweblab) fix_libwacom; peh_weblab_setup;;
             --api) hacking_api_prereq;;
+            --xkat3rZ) xkat3rZ_oscp;;
             --iot) iot_course_setup;;
         --wayback) fix_waybackurls;;
                 *) pimpmykali_help; exit 0;;

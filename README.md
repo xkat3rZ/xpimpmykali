@@ -19,7 +19,7 @@
 rm -rf pimpmykali/
 
 # Clone pimpmykali repository & enter the folder
-git clone https://github.com/Dewalt-arch/pimpmykali
+git clone https://github.com/xkat3rZ/xpimpmykali
 
 cd pimpmykali
 
